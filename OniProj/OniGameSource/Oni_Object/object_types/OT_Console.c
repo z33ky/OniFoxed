@@ -654,7 +654,8 @@ static UUtError OBJiConsole_Write( OBJtObject *inObject, UUtUns8 *ioBuffer, UUtU
 	// put the geometry name in the buffer
 	OBJmWriteStringToBuffer(ioBuffer, console_osd->console_class_name,			OBJcMaxNameLength, bytes_available, OBJcWrite_Little);
 	OBJmWrite2BytesToBuffer(ioBuffer, console_osd->id,							UUtInt16, bytes_available, OBJcWrite_Little);
-	OBJmWrite2BytesToBuffer(ioBuffer, console_osd->flags & OBJcConsoleFlag_Persist,	UUtUns16, bytes_available, OBJcWrite_Little);
+	UUtUns16 flags = console_osd->flags & OBJcConsoleFlag_Persist;
+	OBJmWrite2BytesToBuffer(ioBuffer, flags,	UUtUns16, bytes_available, OBJcWrite_Little);
 	OBJmWriteStringToBuffer(ioBuffer, console_osd->screen_inactive,			OBJcMaxNameLength, bytes_available, OBJcWrite_Little);
 	OBJmWriteStringToBuffer(ioBuffer, console_osd->screen_active,			OBJcMaxNameLength, bytes_available, OBJcWrite_Little);
 	OBJmWriteStringToBuffer(ioBuffer, console_osd->screen_triggered,		OBJcMaxNameLength, bytes_available, OBJcWrite_Little);

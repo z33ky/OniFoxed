@@ -683,7 +683,8 @@ static UUtError OBJiTurret_Write( OBJtObject *inObject, UUtUns8 *ioBuffer, UUtUn
 
 	OBJmWriteStringToBuffer(ioBuffer, turret_osd->turret_class_name,		OBJcMaxNameLength, bytes_available, OBJcWrite_Little);
 	OBJmWrite2BytesToBuffer(ioBuffer, turret_osd->id,						UUtUns16, bytes_available, OBJcWrite_Little);
-	OBJmWrite2BytesToBuffer(ioBuffer, turret_osd->flags & OBJcTurretFlag_Persist, UUtUns16, bytes_available, OBJcWrite_Little);
+	UUtUns16 flags = turret_osd->flags & OBJcTurretFlag_Persist;
+	OBJmWrite2BytesToBuffer(ioBuffer, flags, UUtUns16, bytes_available, OBJcWrite_Little);
 	OBJmWrite4BytesToBuffer(ioBuffer, obsolete_timeout,					UUtUns32, bytes_available, OBJcWrite_Little);
 	OBJmWrite4BytesToBuffer(ioBuffer, obsolete_start_horiz_angle,		float, bytes_available, OBJcWrite_Little);
 	OBJmWrite4BytesToBuffer(ioBuffer, obsolete_start_vert_angle,			float, bytes_available, OBJcWrite_Little);

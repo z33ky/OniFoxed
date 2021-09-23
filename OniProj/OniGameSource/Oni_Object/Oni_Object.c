@@ -2286,7 +2286,8 @@ OBJiBinaryData_Save(
 		num_bytes = data_size;
 		
 		// write the version number into the buffer
-		OBDmWrite4BytesToBuffer(buffer, OBJcCurrentVersion, UUtUns32, num_bytes, OBJcWrite_Little);
+		UUtUns32 version = OBJcCurrentVersion;
+		OBDmWrite4BytesToBuffer(buffer, version, UUtUns32, num_bytes, OBJcWrite_Little);
 		
 		for (j = 0; j < num_objects; j++)
 		{

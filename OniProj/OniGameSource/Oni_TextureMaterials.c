@@ -211,7 +211,8 @@ ONiTMBinaryData_Save(
 	num_bytes = data_size;
 	
 	// write the version
-	OBDmWrite4BytesToBuffer(buffer, ONcTMCurrentVersion, UUtUns32, num_bytes, OBJcWrite_Little);
+	UUtUns32 version = ONcTMCurrentVersion;
+	OBDmWrite4BytesToBuffer(buffer, version, UUtUns32, num_bytes, OBJcWrite_Little);
 	
 	// save the num_elements pointer
 	num_elements_ptr = buffer;

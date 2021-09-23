@@ -1340,7 +1340,8 @@ static UUtError OBJiDoor_Write( OBJtObject *inObject, UUtUns8 *ioBuffer, UUtUns3
 	OBJmWriteStringToBuffer(ioBuffer, door_osd->door_class_name,				OBJcMaxNameLength, bytes_available, OBJcWrite_Little);
 	OBJmWrite2BytesToBuffer(ioBuffer, door_osd->id,								UUtUns16, bytes_available, OBJcWrite_Little);
 	OBJmWrite2BytesToBuffer(ioBuffer, door_osd->key_id,							UUtUns16, bytes_available, OBJcWrite_Little);
-	OBJmWrite2BytesToBuffer(ioBuffer, door_osd->flags & OBJcDoorFlag_Persist,	UUtUns16, bytes_available, OBJcWrite_Little);
+	UUtUns16 flags = door_osd->flags & OBJcDoorFlag_Persist;
+	OBJmWrite2BytesToBuffer(ioBuffer, flags,	UUtUns16, bytes_available, OBJcWrite_Little);
 	OBJmWrite4BytesToBuffer(ioBuffer, door_osd->door_frame_position.x,			float, bytes_available, OBJcWrite_Little);
 	OBJmWrite4BytesToBuffer(ioBuffer, door_osd->door_frame_position.y,			float, bytes_available, OBJcWrite_Little);
 	OBJmWrite4BytesToBuffer(ioBuffer, door_osd->door_frame_position.z,			float, bytes_available, OBJcWrite_Little);

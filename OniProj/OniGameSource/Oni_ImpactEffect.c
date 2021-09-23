@@ -2345,7 +2345,8 @@ ONiIEBinaryData_Save(
 	num_bytes = data_size;
 
 	// write the header
-	OBDmWrite4BytesToBuffer(buffer, ONcIECurrentVersion, UUtUns32, num_bytes, OBJcWrite_Little);
+	UUtUns32 version = ONcIECurrentVersion;
+	OBDmWrite4BytesToBuffer(buffer, version, UUtUns32, num_bytes, OBJcWrite_Little);
 
 	OBDmWrite4BytesToBuffer(buffer, num_impact_types,				UUtUns32, num_bytes, OBJcWrite_Little);
 	OBDmWrite4BytesToBuffer(buffer, num_material_types,				UUtUns32, num_bytes, OBJcWrite_Little);

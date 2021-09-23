@@ -460,7 +460,8 @@ OBJiNeutral_Write(
 
 	for(itr = 0; itr < neutral_osd->num_lines; itr++) {
 		OBJmWrite2BytesToBuffer(ioBuffer, neutral_osd->lines[itr].flags,			UUtUns16,		bytes_available, OBJcWrite_Little);
-		OBJmWrite2BytesToBuffer(ioBuffer, 0,										UUtUns16,		bytes_available, OBJcWrite_Little);		// padding
+		UUtUns16 padding = 0;
+		OBJmWrite2BytesToBuffer(ioBuffer, padding,										UUtUns16,		bytes_available, OBJcWrite_Little);		// padding
 		OBJmWrite2BytesToBuffer(ioBuffer, neutral_osd->lines[itr].anim_type,		UUtUns16,		bytes_available, OBJcWrite_Little);
 		OBJmWrite2BytesToBuffer(ioBuffer, neutral_osd->lines[itr].other_anim_type,	UUtUns16,		bytes_available, OBJcWrite_Little);
 		OBJmWriteStringToBuffer(ioBuffer, neutral_osd->lines[itr].sound,			sizeof(neutral_osd->lines[itr].sound),	bytes_available, OBJcWrite_Little);

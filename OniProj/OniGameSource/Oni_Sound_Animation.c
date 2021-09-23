@@ -1174,7 +1174,8 @@ OSiSABinaryData_Save(
 		UUrMemory_Clear(temp_buffer, OSgMaxBufferSize);
 		
 		// write the version
-		OBDmWrite4BytesToBuffer(temp_buffer, OS2cCurrentVersion, UUtUns32, temp_buffer_size, OBJcWrite_Little);
+		UUtUns32 version = OS2cCurrentVersion;
+		OBDmWrite4BytesToBuffer(temp_buffer, version, UUtUns32, temp_buffer_size, OBJcWrite_Little);
 		
 		// write the tag
 		bytes_written =

@@ -1129,7 +1129,8 @@ OSrAmbient_Save(
 	bytes_avail = OScMaxBufferSize;
 	
 	// write the version
-	BDmWrite4BytesToBuffer(buffer, OS2cCurrentVersion, UUtUns32, bytes_avail, BDcWrite_Little);
+	UUtUns32 version = OS2cCurrentVersion;
+	BDmWrite4BytesToBuffer(buffer, version, UUtUns32, bytes_avail, BDcWrite_Little);
 	
 	// write the ambient sound to the buffer
 	BDmWrite4BytesToBuffer(buffer, inAmbient->priority, SStPriority2, bytes_avail, BDcWrite_Little);
@@ -2004,14 +2005,16 @@ OSrGroup_Save(
 	bytes_avail = data_size;
 	
 	// write the version
-	BDmWrite4BytesToBuffer(buffer, OS2cCurrentVersion, UUtUns32, bytes_avail, BDcWrite_Little);
+	UUtUns32 version = OS2cCurrentVersion;
+	BDmWrite4BytesToBuffer(buffer, version, UUtUns32, bytes_avail, BDcWrite_Little);
 	
 	// write the group volume and pitch
 	BDmWrite4BytesToBuffer(buffer, inGroup->group_volume, float, bytes_avail, BDcWrite_Little);
 	BDmWrite4BytesToBuffer(buffer, inGroup->group_pitch, float, bytes_avail, BDcWrite_Little);
 	
 	// write the flag and flag data
-	BDmWrite2BytesToBuffer(buffer, (inGroup->flags & SScGroupFlag_WriteMask), UUtUns16, bytes_avail, BDcWrite_Little);
+	UUtUns32 flags = inGroup->flags & SScGroupFlag_WriteMask;
+	BDmWrite2BytesToBuffer(buffer, flags, UUtUns16, bytes_avail, BDcWrite_Little);
 	BDmWrite2BytesToBuffer(buffer, inGroup->flag_data, UUtUns16, bytes_avail, BDcWrite_Little);
 	
 	// write the group channels and permutations to the buffer
@@ -2416,7 +2419,8 @@ OSrImpulse_Save(
 	bytes_avail = OScMaxBufferSize;
 	
 	// write the version
-	BDmWrite4BytesToBuffer(buffer, OS2cCurrentVersion, UUtUns32, bytes_avail, BDcWrite_Little);
+	UUtUns32 version = OS2cCurrentVersion;
+	BDmWrite4BytesToBuffer(buffer, version, UUtUns32, bytes_avail, BDcWrite_Little);
 	
 	// write the ambient sound to the buffer
 	BDmWriteStringToBuffer(buffer, inImpulse->impulse_group_name, SScMaxNameLength, bytes_avail, BDcWrite_Little);
