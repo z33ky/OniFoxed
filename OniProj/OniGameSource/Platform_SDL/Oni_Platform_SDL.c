@@ -48,6 +48,11 @@ ONiPlatform_CreateWindow(
 {
 	//FIXME: displayIndex
 	SDL_DisplayMode desktopMode;
+	desktopMode.format = SDL_PIXELFORMAT_RGB888;
+	desktopMode.w = 1024;
+	desktopMode.h = 768;
+	desktopMode.refresh_rate = 60;
+	desktopMode.driverdata = 0;
 	SDL_GetDesktopDisplayMode(0, &desktopMode);
 	//TODO: SDL_WINDOW_FULLSCREEN?
 	ioPlatformData->gameWindow = SDL_CreateWindow(ONcMainWindowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, desktopMode.w, desktopMode.h, SDL_WINDOW_OPENGL);
