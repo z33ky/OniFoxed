@@ -85,6 +85,7 @@ BFiCheckFileName(
 	
 	name = inFileName;
 	
+	/*
 	while (*name)
 	{
 		if (name[0] == '/')
@@ -104,6 +105,7 @@ BFiCheckFileName(
 		
 		name++;
 	}
+	*/
 	
 	return UUcError_None;
 }
@@ -125,7 +127,7 @@ BFrFileRef_Set(
 	}
 
 	/* Make sure the path name is valid */
-	error = UUcError_None; //BFiCheckFileName(inFileName);
+	error = BFiCheckFileName(inFileName);
 	UUmError_ReturnOnError(error);
 	
 	BFiConvertWin2Unix(inFileName, mungedName);
