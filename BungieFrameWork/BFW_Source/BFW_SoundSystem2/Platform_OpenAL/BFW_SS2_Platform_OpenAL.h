@@ -10,6 +10,7 @@
 // includes
 // ======================================================================
 #include "BFW.h"
+#include "AL/al.h"
 
 // ======================================================================
 // typedefs
@@ -19,6 +20,7 @@ typedef struct{}		SStGuard;
 
 typedef struct SStSoundChannel_PlatformData
 {
+	ALuint buffer, source;
 } SStSoundChannel_PlatformData;
 
 // ======================================================================
