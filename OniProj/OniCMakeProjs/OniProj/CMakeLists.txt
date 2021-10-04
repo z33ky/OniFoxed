@@ -523,6 +523,8 @@ if(Platform_SDL)
             SDL2
             m
             openal
+            avutil
+            avcodec
     )
 elseif(WIN32)
     add_executable(Oni WIN32
