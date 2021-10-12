@@ -147,6 +147,8 @@ SS2rPlatform_SoundChannel_SetSoundData(
 	SStSoundChannel				*inSoundChannel,
 	SStSoundData				*inSoundData)
 {
+	UUtBool success = UUcFalse;
+	char *decoded = NULL;
 	ALenum format;
 	unsigned channels = SSrSound_GetNumChannels(inSoundData);
 	if (inSoundChannel->flags & SScSoundChannelFlag_Mono && SScBitsPerSample == 8)
@@ -183,24 +185,23 @@ SS2rPlatform_SoundChannel_SetSoundData(
 		UUrPrintWarning("Failed to allocate ADPCM_MS codec context");
 		return UUcFalse;
 	}
-	c->codec_id = AV_CODEC_ID_ADPCM_MS;
-	c->codec_type = AVMEDIA_TYPE_AUDIO;
 	c->channels = channels;
 	c->sample_rate = SScSamplesPerSecond;
 	c->sample_fmt = AV_SAMPLE_FMT_S16;
-	c->channel_layout = 0;
-	c->bit_rate = 128000; //(c->sample_rate * BitsPerSample) / c->channels;
 	int ret = avcodec_open2(c, codec, NULL);
 	if (ret < 0) {
 		UUrPrintWarning("Failed to open ADPCM_MS codec (error %d)", ret);
 		goto ctx_error;
 	}
 
+	//TODO: seems obsolete, causes memleak
+	/*
 	AVCodecParameters *par = avcodec_parameters_alloc();
 	avcodec_parameters_from_context(par, c);
 	par->block_align = (channels == 2) ? 1024 : 512;
 	avcodec_parameters_to_context(c, par);
 	//avcodec_parameters_free(par);
+	*/
 
 	AVPacket *pkt = av_packet_alloc();
 	if (!pkt) {
@@ -212,7 +213,7 @@ SS2rPlatform_SoundChannel_SetSoundData(
 	// this pointer will iterate over the data by framesz
 	char *frame = inSoundData->data;
 	char *frames_end = frame + inSoundData->num_bytes;
-	const size_t framesz = par->block_align;
+	const size_t framesz = (channels == 2) ? 1024 : 512; //par->block_align;
 	
 	AVFrame *decoded_frame = av_frame_alloc();
 	if (!decoded_frame) {
