@@ -167,16 +167,20 @@ SS2rPlatform_SoundChannel_SetSoundData(
 	}
 	else
 	{
+		UUrPrintWarning("Invalid format. bps=%d, SStSoundChannel flags = %x", SScBitsPerSample, inSoundChannel->flags);
 		return UUcFalse;
 	}
 	
+	//FIXME: it looks like one of the libav functions leaks some memory through av_alloc()
 	av_log_set_level(AV_LOG_DEBUG);
 	const AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_ADPCM_MS);
 	if (!codec) {
+		UUrPrintWarning("Failed to find ADPCM_MS codec");
 		return UUcFalse;
 	}
 	AVCodecContext *c = avcodec_alloc_context3(codec);
 	if (!c) {
+		UUrPrintWarning("Failed to allocate ADPCM_MS codec context");
 		return UUcFalse;
 	}
 	c->codec_id = AV_CODEC_ID_ADPCM_MS;
@@ -186,8 +190,10 @@ SS2rPlatform_SoundChannel_SetSoundData(
 	c->sample_fmt = AV_SAMPLE_FMT_S16;
 	c->channel_layout = 0;
 	c->bit_rate = 128000; //(c->sample_rate * BitsPerSample) / c->channels;
-	if (avcodec_open2(c, codec, NULL) < 0) {
-		return UUcFalse;
+	int ret = avcodec_open2(c, codec, NULL);
+	if (ret < 0) {
+		UUrPrintWarning("Failed to open ADPCM_MS codec (error %d)", ret);
+		goto ctx_error;
 	}
 
 	AVCodecParameters *par = avcodec_parameters_alloc();
@@ -198,56 +204,66 @@ SS2rPlatform_SoundChannel_SetSoundData(
 
 	AVPacket *pkt = av_packet_alloc();
 	if (!pkt) {
-		return UUcFalse;
+		UUrPrintWarning("Failed to allocate libav packet");
+		goto error;
 	}
 
-	//TODO: apparently only a single "frame" should be sent per packet
+	// we need to send data frame by frame
+	// this pointer will iterate over the data by framesz
 	char *frame = inSoundData->data;
 	char *frames_end = frame + inSoundData->num_bytes;
 	const size_t framesz = par->block_align;
+	
 	AVFrame *decoded_frame = av_frame_alloc();
 	if (!decoded_frame) {
-		return UUcFalse;
+		UUrPrintWarning("Failed to allocate libav frame");
+		goto error;
 	}
 	//FIXME: slight overallocation
-	void *decoded = malloc((inSoundData->num_bytes + framesz) * 4);
+	decoded = malloc((inSoundData->num_bytes + framesz) * 4);
 	size_t total = 0;
 	while(1) {
-		int ret = avcodec_receive_frame(c, decoded_frame);
+		ret = avcodec_receive_frame(c, decoded_frame);
 		if (ret == -11) //EAGAIN
 		{
 			if (frame == frames_end) {
 				ret = avcodec_send_packet(c, NULL);
 				if (ret != 0) {
-					return UUcFalse;
+					UUrPrintWarning("Failed to send NULL libav packet (error %d)", ret);
+					break;
 				}
 			} else {
 				size_t left = frames_end - frame;
 				size_t sz = (framesz <= left) ? framesz : left;
-				//FIXME: can we not allocate a new buffer for every frame??
+				//TODO: can we not allocate a new buffer for every frame??
 				void *avbuf = av_memdup(frame, sz);
 				if (!avbuf) {
-					return UUcFalse;
+					UUrPrintWarning("Failed to allocate libav buffer");
+					break;
 				}
 				ret = av_packet_from_data(pkt, avbuf, sz);
 				if (ret != 0) {
+					UUrPrintWarning("Failed to initialize libav packet (error %d)", ret);
 					av_free(avbuf);
-					return UUcFalse;
+					break;
 				}
 				ret = avcodec_send_packet(c, pkt);
 				av_packet_unref(pkt);
 				if (ret != 0) {
-					return UUcFalse;
+					UUrPrintWarning("Failed to send libav packet (error %d)", ret);
+					break;
 				}
 				frame += sz;
 			}
 			continue;
 		}
 		if (ret == AVERROR_EOF) {
+			success = UUcTrue;
 			break;
 		}
 		if (ret < 0) {
-			return UUcFalse;
+			UUrPrintWarning("Failed to receive libav frame (error %d)", ret);
+			break;
 		}
 		int data_size = av_samples_get_buffer_size(
 			NULL,
@@ -257,20 +273,28 @@ SS2rPlatform_SoundChannel_SetSoundData(
 			1
 		);
 		memcpy(decoded + total, decoded_frame->extended_data[0], data_size);
-		av_frame_unref(decoded_frame);
 		total += data_size;
+		// the next avcodec_receive_frame() automatically unrefs the current decoded_frame
 	}
-	av_frame_free(decoded_frame);
+	av_frame_unref(decoded_frame);
+	av_frame_free(&decoded_frame);
+	
+error:
+	av_packet_free(&pkt);
+ctx_error:
+	avcodec_free_context(&c);
 	
 	alSourcei(inSoundChannel->pd.source, AL_BUFFER, 0);
-	alBufferData(inSoundChannel->pd.buffer, format, decoded, total, SScSamplesPerSecond);
-	alSourcei(inSoundChannel->pd.source, AL_BUFFER, inSoundChannel->pd.buffer);
+	
+	if (success)
+	{
+		alBufferData(inSoundChannel->pd.buffer, format, decoded, total, SScSamplesPerSecond);
+		alSourcei(inSoundChannel->pd.source, AL_BUFFER, inSoundChannel->pd.buffer);
+	}
+	
 	free(decoded);
 	
-	avcodec_free_context(&c);
-	av_packet_free(pkt);
-	
-	return UUcTrue;
+	return success;
 }
 
 // ----------------------------------------------------------------------
